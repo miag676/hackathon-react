@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Timetable Example</title>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid black;
+        text-align: left;
+        padding: 8px;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="timetableContainer"></div>
+    <script>
+      const timetable = {
+        "RIS(63268) - LV": "Thursday 13:00 - 15:00",
+        "RIS(63268) - P": "Wednesday 14:00 - 17:00",
+        // Add the rest of your timetable data here...
+        "TPO(63256) - P": "Wednesday 08:00 - 11:00",
+      };
+
+      const timetable2 = {
+        "RIS(63268) - LV": "Thursday 13:00 - 15:00",
+        "RIS(63268) - P": "Wednesday 14:00 - 17:00",
+        "TIS - LV": "Monday 14:00 - 16:00",
+        "TIS - P": "Tuesday 14:00 - 17:00",
+        "DS - LV": "Friday 09:00 - 11:00",
+        "DS - P": "Thursday 09:00 - 12:00",
+        "PI - LV": "Thursday 16:00 - 18:00",
+        "PI - P": "Monday 11:00 - 14:00",
+        "TPO(63256) - LV": "Thursday 15:00 - 17:00",
+        "TPO(63256) - P": "Wednesday 08:00 - 11:00",
+      };
+
+      function splitTimeString(timeString) {
+        // Split the string by space to separate the day from the times
+        const index = timeString.indexOf(" ");
+        const day = timeString.substring(0, index);
+        const timeRange = timeString.split(" ").slice(1).join(" ");
+
+        // Split the time range by '-' to separate the start and end times
+        const startTime = timeRange.split(" - ")[0];
+        const endTime = timeRange.split(" - ")[1];
+
+        // Extract hours from the start and end times and convert them to integers
+        const start = parseInt(startTime.split(":")[0], 10);
+        const end = parseInt(endTime.split(":")[0], 10);
+
+        // Return the values
+        return [day, start, end];
+      }
+
+      function generate2DTimetable(timetable) {
+        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        const table = document.createElement("table");
+        const headerRow = table.insertRow();
+        headerRow.insertCell().textContent = "Time/Day"; // Corner cell
+
+        // Create headers for days
+        days.forEach((day) => {
+          headerRow.insertCell().textContent = day;
+        });
+
+        // Initialize time slots
+        for (let hour = 8; hour <= 17; hour++) {
+          // Assuming classes are from 8:00 to 17:00
+          const row = table.insertRow();
+          const timeSlot = hour < 10 ? `0${hour}:00` : `${hour}:00`;
+          row.insertCell().textContent = timeSlot; // First column for time
+
+          days.forEach(() => row.insertCell()); // Create empty cells for each day
+        }
+
+        // Map courses to their time slots
+        Object.entries(timetable).forEach(([course, timeInfo]) => {
+          //const [dayt1, time2] = timeInfo.split(' - ');
+          //const [startTime, endTime] = time.split(' - ').map(t => parseInt(t.split(':')[0]));
+          const [day, startTime, endTime] = splitTimeString(timeInfo);
+
+          days.forEach((dayOfWeek, dayIndex) => {
+            if (day.includes(dayOfWeek)) {
+              for (let hour = startTime; hour < endTime; hour++) {
+                const row = table.rows[hour - 7]; // Adjust index based on your table's start time
+                const cell = row.cells[dayIndex + 1]; // +1 to skip the time column
+                cell.textContent += `${course}\n`; // Add course name to cell
+              }
+            }
+          });
+        });
+
+        document.getElementById("timetableContainer").appendChild(table);
+      }
+
+      generate2DTimetable(timetable2);
+    </script>
+  </body>
+</html>
